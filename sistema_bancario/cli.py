@@ -1,4 +1,6 @@
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
+import re
 from sistema_bancario.sistema import SistemaBancario
 
 def __interface_saque(*, funcao_saque):
@@ -18,6 +20,25 @@ def __interface_extrato(extrato, /, *, bobina=40):
         print(f'{transacao["data"].strftime("%c")} {"+" if transacao["valor"].is_signed() else "-"} R${abs(transacao["valor"]):.2f}')
     print(''.center(bobina, '-'))
 
+def __interface_adiciona_usuario(adicionar_usuario):
+    cpf = str(input('Insira o CPF: '))
+    nome = str(input('Insira o Nome: '))
+    data_nascimento = input('Insira a Data de nascimento (DD/MM/AAAA): ')
+    endereco = str(input('Insira o Endereço: '))
+
+    cpf = int(re.sub(r'\D', '', cpf))
+    data_nascimento = datetime.strptime(data_nascimento, '%d/%m/%Y').date()
+
+    adicionar_usuario(
+        {
+            'cpf': cpf,
+            'data_nascimento': data_nascimento,
+            'endereco': endereco,
+            'nome': nome,
+        }
+    )
+    print('Usuário adicionado com sucesso!')
+
 def interface(sistema_bancario: SistemaBancario):
 
     menu = """
@@ -25,6 +46,7 @@ def interface(sistema_bancario: SistemaBancario):
     [d] Depositar
     [s] Sacar
     [e] Extrato
+    [au] Adicionar usuario
     [q] Sair
 
     => """
@@ -40,6 +62,9 @@ def interface(sistema_bancario: SistemaBancario):
 
             case "e":
                 __interface_extrato(sistema_bancario.extrato(), bobina=50)
+
+            case "au":
+                __interface_adiciona_usuario(sistema_bancario.adicionar_usuario)
 
             case "q":
                 return False

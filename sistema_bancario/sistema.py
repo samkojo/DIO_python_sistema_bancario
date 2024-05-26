@@ -1,13 +1,22 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List, TypedDict
+from typing import Dict, List, TypedDict
 from sistema_bancario.configuracao import configuracoes
 
 class Transacao(TypedDict):
     data: datetime
+    agencia: str
+    conta: int
     valor: Decimal
 
+class Usuario(TypedDict):
+    cpf: int
+    nome: str
+    data_nascimento: datetime.date
+    endereco: str
+
 class SistemaBancario():
+    __usuarios = {}
     __extrato: List[Transacao] = []
     __saldo: Decimal = 0
     __qtd_saque_dia: int = 0
@@ -49,3 +58,8 @@ class SistemaBancario():
     def extrato(self):
         return self.__extrato.copy()
         
+    def adicionar_usuario(self, usuario: Usuario):
+        resultado = self.__usuarios.setdefault(usuario['cpf'], usuario)
+
+        if (usuario != resultado):
+            raise ValueError('Já existe um usuário com mesmo cpf')

@@ -19,9 +19,10 @@ Nessa v1 não será necessário considerar controle de acesso e multiplos usuari
     - Sugestão de saida: saldo e extrato
   - [x] Função extrato deve receber os argumentos por posição e nome (positional only e keyword only)
     - Sugestão de entrada: saldo (positional) e extrato (nomeado)
-- [ ] Adicionar usuario, podendo ter 1 por cpf
-  - [ ] Usuário composto por nome, data de nascimento cpf e endereço (string com formato "logradouro, nro - bairro - cidade/sigla estado")
-  - [ ] Armazenar somente numeros no cpf
+- [x] Adicionar usuario, podendo ter 1 por cpf
+  - [x] Usuário composto por nome, data de nascimento, cpf e endereço (string com formato "logradouro, nro - bairro - cidade/sigla estado")
+  - [ ] Implementar validações
+  - [x] Armazenar somente numeros no cpf
 - [ ] Adicionar conta, precisando estar vinculado a um usuario (1 usuario podem ter varias contas)
   - [ ] Conta composto por: agencia, numero da conta e usuario.
   - [ ] Numero da conta é sequencial, iniciando em 1
