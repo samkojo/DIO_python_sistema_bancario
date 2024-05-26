@@ -10,7 +10,7 @@ Nessa v1 não será necessário considerar controle de acesso e multiplos usuari
 - [x] Limite de 3 saques por dia
 - [x] Caso usuario não tenha saldo, exibir mensagem de falta de saldo
 - [x] Imprimir extrato
-- [ ] Modularizar projeto
+- [x] Modularizar projeto
   - [ ] Função saque deve receber os argumentos apenas por nome (keyword only)
     - [ ] Sugestão de entrada: saldo, valor, extrato, limite, numero_saques, limite_saques
     - [ ] Sugestão de retorno: saldo e extrato
@@ -33,7 +33,7 @@ Nessa v1 não será necessário considerar controle de acesso e multiplos usuari
 Pode executar via terminal
 
 ```bash
-python sistema_bancario.py
+python -m sistema_bancario
 ```
 
 ou via Makefile, podendo configurar variaveis de ambiente copiando `.env.example` para `.env`:

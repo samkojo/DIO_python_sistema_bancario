@@ -3,4 +3,4 @@ export
 
 .PHONY: run
 run:
-	python sistema_bancario.py
+	python -m sistema_bancario
