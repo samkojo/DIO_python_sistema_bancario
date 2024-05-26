@@ -15,8 +15,14 @@ class Usuario(TypedDict):
     data_nascimento: datetime.date
     endereco: str
 
+class Conta(TypedDict):
+    cpf: int
+    agencia: str
+    conta: int
+
 class SistemaBancario():
     __usuarios = {}
+    __contas: List[Conta] = []
     __extrato: List[Transacao] = []
     __saldo: Decimal = 0
     __qtd_saque_dia: int = 0
@@ -62,4 +68,23 @@ class SistemaBancario():
         resultado = self.__usuarios.setdefault(usuario['cpf'], usuario)
 
         if (usuario != resultado):
-            raise ValueError('Já existe um usuário com mesmo cpf')
+            raise ValueError('Já existe um usuário com mesmo cpf!')
+
+    def adicionar_conta(self, cpf: int) -> Conta:
+        if not self.__usuarios.get(cpf, None):
+            raise ValueError('Você não cadastrou esse usuário ainda!')
+
+        numero_conta = 1
+        if len(self.__contas):
+            numero_conta += self.__contas[-1]['conta']
+
+        conta: Conta = {
+                'agencia': '0001',
+                'conta': numero_conta,
+                'cpf': cpf,
+        }
+        self.__contas.append(
+            conta
+        )
+
+        return conta

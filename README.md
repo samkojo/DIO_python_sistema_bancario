@@ -23,10 +23,10 @@ Nessa v1 não será necessário considerar controle de acesso e multiplos usuari
   - [x] Usuário composto por nome, data de nascimento, cpf e endereço (string com formato "logradouro, nro - bairro - cidade/sigla estado")
   - [ ] Implementar validações
   - [x] Armazenar somente numeros no cpf
-- [ ] Adicionar conta, precisando estar vinculado a um usuario (1 usuario podem ter varias contas)
-  - [ ] Conta composto por: agencia, numero da conta e usuario.
-  - [ ] Numero da conta é sequencial, iniciando em 1
-  - [ ] Numero da agencia é fixo "0001"
+- [x] Adicionar conta, precisando estar vinculado a um usuario (1 usuario podem ter varias contas)
+  - [x] Conta composto por: agencia, numero da conta e usuario.
+  - [x] Numero da conta é sequencial, iniciando em 1
+  - [x] Numero da agencia é fixo "0001"
 - [ ] Para acessar as funcionalidades de deposito, saque e extrato, deve passar que agencia e conta
   - [ ] Para isso primeiro selecionar qual usuario, listas as contas e assim selecionar agencia e conta
 

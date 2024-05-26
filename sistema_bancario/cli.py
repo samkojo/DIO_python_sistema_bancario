@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 import re
-from sistema_bancario.sistema import SistemaBancario
+from sistema_bancario.sistema import Conta, SistemaBancario
 
 def __interface_saque(*, funcao_saque):
     valor = Decimal(input("Informe o valor do saque: R$ "))
@@ -39,6 +39,14 @@ def __interface_adiciona_usuario(adicionar_usuario):
     )
     print('Usuário adicionado com sucesso!')
 
+def __interface_adiciona_conta(adicionar_conta):
+    cpf = str(input('Insira o CPF: '))
+    cpf = int(re.sub(r'\D', '', cpf))
+
+    conta: Conta = adicionar_conta(cpf)
+    print(f'Conta {conta["conta"]} cadastrada com sucesso!')
+
+
 def interface(sistema_bancario: SistemaBancario):
 
     menu = """
@@ -47,6 +55,7 @@ def interface(sistema_bancario: SistemaBancario):
     [s] Sacar
     [e] Extrato
     [au] Adicionar usuario
+    [ac] Adicionar conta
     [q] Sair
 
     => """
@@ -65,6 +74,9 @@ def interface(sistema_bancario: SistemaBancario):
 
             case "au":
                 __interface_adiciona_usuario(sistema_bancario.adicionar_usuario)
+
+            case "ac":
+                __interface_adiciona_conta(sistema_bancario.adicionar_conta)
 
             case "q":
                 return False
