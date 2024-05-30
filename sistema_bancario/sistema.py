@@ -21,12 +21,13 @@ class Conta(TypedDict):
     conta: int
 
 class SistemaBancario():
-    __usuarios = {}
-    __contas: List[Conta] = []
-    __extrato: List[Transacao] = []
-    __saldo: Decimal = 0
-    __qtd_saque_dia: int = 0
-    __ultimo_dia_saque: str = None
+    def __init__(self) -> None:
+        self.__usuarios = {}
+        self.__contas: List[Conta] = []
+        self.__extrato: List[Transacao] = []
+        self.__saldo: Decimal = 0
+        self.__qtd_saque_dia: int = 0
+        self.__ultimo_dia_saque: str = None
 
     def __adiciona_transacao(self, valor: Decimal):
         self.__saldo -= valor
