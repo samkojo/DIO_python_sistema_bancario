@@ -29,6 +29,67 @@ Nessa v1 não será necessário considerar controle de acesso e multiplos usuari
   - [x] Numero da agencia é fixo "0001"
 - [ ] Para acessar as funcionalidades de deposito, saque e extrato, deve passar que agencia e conta
   - [ ] Para isso primeiro selecionar qual usuario, listas as contas e assim selecionar agencia e conta
+- [ ] Organizar código conforme [Modelagem UML](#modelagem-uml)
+
+## Modelagem UML
+
+```mermaid
+classDiagram
+    class Transacao{
+        +registrar(conta: Conta)
+    }
+    <<interface>> Transacao
+
+    class Deposito{
+        -valor: Decimal
+    }
+    Deposito --|> Transacao
+
+    class Saque{
+        -valor: Decimal
+    }
+    Saque --|> Transacao
+
+    class Historico{
+        +adicionar_transacao(transacao: Transacao)
+    }
+
+    class Conta{
+        -saldo: Decimal
+        -numero: int
+        -agencia: str
+        -cliente: Cliente
+        -historico: Historico
+        +saldo() Decimal
+        +nova_conta(cliente: Cliente, numero: int) Conta
+        +sacar(valor: Decimal) bool
+        +depositar(valor: Decimal) bool
+    }
+    Conta "1" --> "1" Historico
+
+    class ContaCorrente{
+        -saque_limite_valor: Decimal
+        -saque_limite_qtd_dia: int
+    }
+    Conta <|-- ContaCorrente
+
+    class Cliente{
+        -endereco: str
+        -contas: list
+        +realizar_transacao(conta: Conta, transacao: Transacao)
+        +adicionar_conta(conta: Conta)
+    }
+    Cliente "1" --> "*" Conta
+    Cliente --> "*" Transacao
+
+    class PessoaFisica{
+        -cpf: str
+        -nome: str
+        -data_nascimento: date
+    }
+    Cliente <|-- PessoaFisica
+   
+```
 
 ## Como usar
 
