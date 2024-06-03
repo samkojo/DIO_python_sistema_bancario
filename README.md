@@ -30,7 +30,7 @@ Nessa v1 não será necessário considerar controle de acesso e multiplos usuari
 - [ ] Para acessar as funcionalidades de deposito, saque e extrato, deve passar que agencia e conta
   - [ ] Para isso primeiro selecionar qual usuario, listas as contas e assim selecionar agencia e conta
 - [x] Organizar código conforme [Modelagem UML](#modelagem-uml)
-- [ ] Adequar funcionamento do projeto conforme alteração de modelagem
+- [x] Adequar funcionamento do projeto conforme alteração de modelagem
 
 ## Modelagem UML
 
