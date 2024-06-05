@@ -3,6 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Dict, List, TypedDict
 from sistema_bancario.configuracao import configuracoes
+from sistema_bancario.utils import log_operacoes
 
 
 class Cliente:
@@ -189,12 +190,14 @@ class SistemaBancario():
     def clientes(self):
         return list(self._clientes.values())
     
+    @log_operacoes
     def adicionar_cliente(self, cliente: Cliente):
         resultado = self._clientes.setdefault(cliente.id, cliente)
 
         if (cliente != resultado):
             raise ValueError('Já existe um cliente com mesmo cpf!')
-
+    
+    @log_operacoes
     def adicionar_conta(self, cliente: Cliente) -> Conta:
         if not self._clientes.get(cliente.id, None):
             raise ValueError('Você não cadastrou esse cliente ainda!')
@@ -204,11 +207,21 @@ class SistemaBancario():
 
         self._ultimo_numero_conta += 1
         return conta
-    
+
+    @log_operacoes
     def deposito(self, valor: Decimal, conta: Conta):
         transacao = Deposito(valor)
         transacao.registrar(conta)
 
+    @log_operacoes
     def saque(self, valor: Decimal, conta: Conta):
         transacao = Saque(valor)
         transacao.registrar(conta)
+
+    @log_operacoes
+    def extrato(self, conta: Conta):
+        return [ 
+            f'{transacao["data"].strftime("%c")} {"-" if transacao["valor"].is_signed() else "+"} R${abs(transacao["valor"]):.2f}'
+            for transacao in conta.historico.extrato 
+        ]
+        

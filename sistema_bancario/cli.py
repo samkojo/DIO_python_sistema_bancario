@@ -14,11 +14,10 @@ def _interface_deposito(funcao_deposito, conta: Conta, /):
     funcao_deposito(valor, conta)
     print(f'R$ {valor:.2f} depositado com sucesso!')
 
-def _interface_extrato(conta: Conta, /, *, bobina=40):
+def _interface_extrato(extrato: List[str], /, *, bobina=40):
     print()
     print('EXTRATO'.center(bobina, '-'))
-    for transacao in conta.historico.extrato:
-        print(f'{transacao["data"].strftime("%c")} {"-" if transacao["valor"].is_signed() else "+"} R${abs(transacao["valor"]):.2f}')
+    [ print(linha_extrato) for linha_extrato in extrato ]
     print(''.center(bobina, '-'))
 
 def _interface_adicionar_cliente(adicionar_cliente):
@@ -125,7 +124,7 @@ def interface(sistema_bancario: SistemaBancario):
             case "e":
                 cliente = _interface_escolha_cliente(sistema_bancario.clientes)
                 conta = _interface_escolha_conta_cliente(cliente.contas)
-                _interface_extrato(conta, bobina=50)
+                _interface_extrato(sistema_bancario.extrato(conta), bobina=50)
 
             case "q":
                 return False
