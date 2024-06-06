@@ -178,6 +178,32 @@ class Saque(Transacao):
         if conta.sacar(self.valor):
             conta.historico.adicionar_transacao(self)
 
+
+class ContaIterador:
+    def __init__(self, clientes: List[Cliente]) -> None:
+        self.clientes = clientes
+        self.contador_cliente = 0
+        self.contador_conta = 0
+
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        try:
+            
+            cliente = self.clientes[self.contador_cliente]
+            try:
+                conta = cliente.contas[self.contador_conta]
+                self.contador_conta += 1
+                return f'Conta: {conta.numero} - Saldo: {conta.saldo}'
+            except IndexError:
+                self.contador_cliente += 1
+                self.contador_conta = 0
+                return self.__next__()
+                
+        except IndexError:
+            raise StopIteration
+        
 class SistemaBancario():
     def __init__(self) -> None:
         ContaCorrente.saque_limite_qtd_dia = configuracoes['saque_limite_qtd_dia']

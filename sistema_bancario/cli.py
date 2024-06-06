@@ -1,8 +1,8 @@
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 import re
-from typing import Generator, List
-from sistema_bancario.sistema import Cliente, Conta, PessoaFisica, SistemaBancario
+from typing import Generator, Iterator, List
+from sistema_bancario.sistema import Cliente, Conta, ContaIterador, PessoaFisica, SistemaBancario
 
 def _interface_saque(*, funcao_saque, conta: Conta):
     valor = Decimal(input("Informe o valor do saque: R$ "))
@@ -100,6 +100,12 @@ def _interface_filtrar_transacao():
     
     return opcao_filtro[escolha_filtro]
 
+def _interface_listar_contas(contas: Iterator):
+    print()
+    print('Listando todas as contas'.center(50, '-'))
+    [ print(conta) for conta in contas ]
+    print(''.center(50, '-'))
+
 def interface(sistema_bancario: SistemaBancario):
 
     menu = """
@@ -109,6 +115,7 @@ def interface(sistema_bancario: SistemaBancario):
     [d] Depositar
     [s] Sacar
     [e] Extrato
+    [lc] Listar contas
     [q] Sair
 
     => """
@@ -138,6 +145,9 @@ def interface(sistema_bancario: SistemaBancario):
                 conta = _interface_escolha_conta_cliente(cliente.contas)
                 opcao_filtro = _interface_filtrar_transacao()
                 _interface_extrato(sistema_bancario.extrato(conta, opcao_filtro), bobina=50)
+
+            case "lc":
+                _interface_listar_contas(ContaIterador(sistema_bancario.clientes))
 
             case "q":
                 return False
