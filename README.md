@@ -33,8 +33,8 @@ Nessa v1 não será necessário considerar controle de acesso e multiplos usuari
 - [x] Adequar funcionamento do projeto conforme alteração de modelagem
 - [x] Decorador de Log
   - Implementar um decorador que seja aplicado a todas as funções (adicionar cliente, adicionar conta, depósito, saque). Esse decorador deve registrar data e hora de cada transação e a descrição da transação.
-- [ ] Gerador de relatório
-  - Criar gerador que permita iterar sobre as transações de uma conta, e retornar, uma a uma, as transações realizadas. Também deve possiblitar filtrar as transação com base no tipo (saque ou deposito).
+- [x] Gerador de relatório
+  - Criar gerador que permita iterar sobre o extrato de uma conta, e retornar, uma a uma, as transações realizadas. Também deve possiblitar filtrar as transação com base no tipo (saque ou deposito).
 - [ ] Iterador personalizado
   - Implementar iterador personalizado ContaIterador que permita iterar sobre todas as contas do banco, retornando informações básicas de cada conta(número, saldo atual, etc.)
 

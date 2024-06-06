@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from decimal import Decimal
-from typing import Dict, List, TypedDict
+from typing import Dict, List, Literal, TypedDict
 from sistema_bancario.configuracao import configuracoes
 from sistema_bancario.utils import log_operacoes
 
@@ -219,9 +219,11 @@ class SistemaBancario():
         transacao.registrar(conta)
 
     @log_operacoes
-    def extrato(self, conta: Conta):
-        return [ 
-            f'{transacao["data"].strftime("%c")} {"-" if transacao["valor"].is_signed() else "+"} R${abs(transacao["valor"]):.2f}'
-            for transacao in conta.historico.extrato 
-        ]
+    def extrato(self, conta: Conta, filtrar_operacao: Literal['Deposito','Saque']):
+        for transacao in conta.historico.extrato:
+            if (filtrar_operacao == 'Deposito' and transacao["valor"].is_signed()) or \
+               (filtrar_operacao == 'Saque' and not transacao["valor"].is_signed()):
+                continue
+            
+            yield f'{transacao["data"].strftime("%c")} {"-" if transacao["valor"].is_signed() else "+"} R${abs(transacao["valor"]):.2f}'
         

@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 import re
-from typing import List
+from typing import Generator, List
 from sistema_bancario.sistema import Cliente, Conta, PessoaFisica, SistemaBancario
 
 def _interface_saque(*, funcao_saque, conta: Conta):
@@ -14,7 +14,7 @@ def _interface_deposito(funcao_deposito, conta: Conta, /):
     funcao_deposito(valor, conta)
     print(f'R$ {valor:.2f} depositado com sucesso!')
 
-def _interface_extrato(extrato: List[str], /, *, bobina=40):
+def _interface_extrato(extrato: Generator, /, *, bobina=40):
     print()
     print('EXTRATO'.center(bobina, '-'))
     [ print(linha_extrato) for linha_extrato in extrato ]
@@ -87,6 +87,18 @@ def _interface_adicionar_conta(adicionar_conta, cliente: Cliente):
     conta: Conta = adicionar_conta(cliente)
     print(f'Conta {conta.numero} cadastrada com sucesso!')
 
+def _interface_filtrar_transacao():
+    opcao_filtro = ['Todos','Deposito','Saque']
+
+    for indice, opcao in enumerate(opcao_filtro):
+        print(f"{indice}. {opcao}")
+    
+    escolha_filtro = int(input('Escolha uma das opções acima (digite o numero correspondente): '))
+
+    if escolha_filtro < 0 or escolha_filtro >= len(opcao_filtro):
+        raise ValueError('Opção inexistente')
+    
+    return opcao_filtro[escolha_filtro]
 
 def interface(sistema_bancario: SistemaBancario):
 
@@ -124,7 +136,8 @@ def interface(sistema_bancario: SistemaBancario):
             case "e":
                 cliente = _interface_escolha_cliente(sistema_bancario.clientes)
                 conta = _interface_escolha_conta_cliente(cliente.contas)
-                _interface_extrato(sistema_bancario.extrato(conta), bobina=50)
+                opcao_filtro = _interface_filtrar_transacao()
+                _interface_extrato(sistema_bancario.extrato(conta, opcao_filtro), bobina=50)
 
             case "q":
                 return False
