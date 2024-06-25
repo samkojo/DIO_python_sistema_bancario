@@ -37,6 +37,7 @@ Nessa v1 não será necessário considerar controle de acesso e multiplos usuari
   - Criar gerador que permita iterar sobre o extrato de uma conta, e retornar, uma a uma, as transações realizadas. Também deve possiblitar filtrar as transação com base no tipo (saque ou deposito).
 - [x] Iterador personalizado
   - Implementar iterador personalizado ContaIterador que permita iterar sobre todas as contas do banco, retornando informações básicas de cada conta(cliente, número da conta e saldo atual)
+- [x] Limitar a 10 transacoes por dia
 
 ## Modelagem UML
 

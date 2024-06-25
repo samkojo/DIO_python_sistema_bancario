@@ -26,6 +26,8 @@ class Cliente:
         pass
 
     def realizar_transacao(self, conta, transacao):
+        if len(conta.historico.transacoes_do_dia()) >= configuracoes['transascao_qtd_dia']:
+            raise ValueError('Você relealizou o limite máximo de transações por dia')
         transacao.registrar(conta)
 
     def adicionar_conta(self, conta):
@@ -67,6 +69,10 @@ class Historico:
             'valor': transacao.valor_transacao,
         }
         self._extrato.append(extrato)
+
+    def transacoes_do_dia(self) -> List[Extrato]:
+        return [transacao for transacao in self.extrato
+                if transacao['data'].date() == datetime.now().date()]
 
 class Conta:
     def __init__(self, numero: int, cliente: Cliente):
@@ -235,14 +241,14 @@ class SistemaBancario():
         return conta
 
     @log_operacoes
-    def deposito(self, valor: Decimal, conta: Conta):
+    def deposito(self, valor: Decimal, cliente: Cliente, conta: Conta):
         transacao = Deposito(valor)
-        transacao.registrar(conta)
+        cliente.realizar_transacao(conta, transacao)
 
     @log_operacoes
-    def saque(self, valor: Decimal, conta: Conta):
+    def saque(self, valor: Decimal, cliente: Cliente, conta: Conta):
         transacao = Saque(valor)
-        transacao.registrar(conta)
+        cliente.realizar_transacao(conta, transacao)
 
     @log_operacoes
     def extrato(self, conta: Conta, filtrar_operacao: Literal['Deposito','Saque']):

@@ -4,14 +4,14 @@ import re
 from typing import Generator, Iterator, List
 from sistema_bancario.sistema import Cliente, Conta, ContaIterador, PessoaFisica, SistemaBancario
 
-def _interface_saque(*, funcao_saque, conta: Conta):
+def _interface_saque(*, funcao_saque, cliente: Cliente, conta: Conta):
     valor = Decimal(input("Informe o valor do saque: R$ "))
-    funcao_saque(valor, conta)
+    funcao_saque(valor, cliente, conta)
     print(f'R$ {valor:.2f} sacado com sucesso!')
 
-def _interface_deposito(funcao_deposito, conta: Conta, /):
+def _interface_deposito(funcao_deposito, cliente: Cliente, conta: Conta, /):
     valor = Decimal(input("Informe o valor do depósito: R$ "))
-    funcao_deposito(valor, conta)
+    funcao_deposito(valor, cliente, conta)
     print(f'R$ {valor:.2f} depositado com sucesso!')
 
 def _interface_extrato(extrato: Generator, /, *, bobina=40):
@@ -133,12 +133,12 @@ def interface(sistema_bancario: SistemaBancario):
             case "d":
                 cliente = _interface_escolha_cliente(sistema_bancario.clientes)
                 conta = _interface_escolha_conta_cliente(cliente.contas)
-                _interface_deposito(sistema_bancario.deposito, conta)
+                _interface_deposito(sistema_bancario.deposito, cliente, conta)
 
             case "s":
                 cliente = _interface_escolha_cliente(sistema_bancario.clientes)
                 conta = _interface_escolha_conta_cliente(cliente.contas)
-                _interface_saque(funcao_saque=sistema_bancario.saque, conta=conta)
+                _interface_saque(funcao_saque=sistema_bancario.saque, cliente=cliente, conta=conta)
 
             case "e":
                 cliente = _interface_escolha_cliente(sistema_bancario.clientes)
