@@ -27,8 +27,8 @@ Nessa v1 não será necessário considerar controle de acesso e multiplos usuari
   - [x] Conta composto por: agencia, numero da conta e usuario.
   - [x] Numero da conta é sequencial, iniciando em 1
   - [x] Numero da agencia é fixo "0001"
-- [ ] Para acessar as funcionalidades de deposito, saque e extrato, deve passar que agencia e conta
-  - [ ] Para isso primeiro selecionar qual usuario, listas as contas e assim selecionar agencia e conta
+- [x] Para acessar as funcionalidades de deposito, saque e extrato, deve passar que agencia e conta
+  - [x] Para isso primeiro selecionar qual usuario, listas as contas e assim selecionar agencia e conta
 - [x] Organizar código conforme [Modelagem UML](#modelagem-uml)
 - [x] Adequar funcionamento do projeto conforme alteração de modelagem
 - [x] Decorador de Log
@@ -38,6 +38,11 @@ Nessa v1 não será necessário considerar controle de acesso e multiplos usuari
 - [x] Iterador personalizado
   - Implementar iterador personalizado ContaIterador que permita iterar sobre todas as contas do banco, retornando informações básicas de cada conta(cliente, número da conta e saldo atual)
 - [x] Limitar a 10 transacoes por dia
+- [ ] Salvar logs em arquivo log.txt sempre anexando
+  - Armazenar funcao, argumentos e resultado da funcao.
+- [ ] Persistir em arquivo clientes.csv dados de clientes
+- [ ] Persistir em arquivo constas.csv dados de contas de clientes
+- [ ] Persistir em arquivo transacoes.csv dados de transacoes de clientes
 
 ## Modelagem UML
 
