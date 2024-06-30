@@ -40,8 +40,8 @@ Nessa v1 não será necessário considerar controle de acesso e multiplos usuari
 - [x] Limitar a 10 transacoes por dia
 - [x] Salvar logs em arquivo log.txt sempre anexando
   - Armazenar funcao, argumentos e resultado da funcao.
-- [ ] Persistir em arquivo clientes.csv dados de clientes
-- [ ] Persistir em arquivo constas.csv dados de contas de clientes
+- [x] Persistir em arquivo clientes.csv dados de clientes
+- [ ] Persistir em arquivo contas.csv dados de contas de clientes
 - [ ] Persistir em arquivo transacoes.csv dados de transacoes de clientes
 
 ## Modelagem UML

@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Dict, List, Literal, TypedDict
 from sistema_bancario.configuracao import configuracoes
-from sistema_bancario.utils import log_operacoes
+from sistema_bancario.utils import ClientesCsv, inicializa_clientes_csv, log_operacoes, persiste_cliente_csv
 
 
 class Cliente:
@@ -50,6 +50,14 @@ class PessoaFisica(Cliente):
     @property
     def nome(self):
         return self._nome
+    
+    @property
+    def data_nascimento(self):
+        return self._data_nascimento
+    
+    @property
+    def endereco(self):
+        return self._endereco
     
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__}: ({self.id})>'
@@ -226,15 +234,41 @@ class ContaIterador:
                 
         except IndexError:
             raise StopIteration
-        
+
+
+def carrega_clientes(list_clientes: List[ClientesCsv]) -> Dict[str, Cliente]:
+    print('Carregando clientes')
+    dict_clientes: Dict[str, Cliente] = {}
+    for cliente in list_clientes:
+        dict_clientes.setdefault(cliente['cpf'],PessoaFisica(
+            cpf=cliente['cpf'],
+            nome=cliente['nome'],
+            data_nascimento=datetime.strptime(cliente['data_nascimento'], '%Y-%m-%d').date(),
+            endereco=cliente['endereco'],
+        ))
+    if len(dict_clientes):
+        print(f'Carregado(s) {len(dict_clientes)} clientes')
+    return dict_clientes
+
+def persiste_cliente(cliente: PessoaFisica):
+    persiste_cliente_csv({
+        'cpf': cliente.id,
+        'nome': cliente.nome,
+        'data_nascimento': cliente.data_nascimento.strftime('%Y-%m-%d'),
+        'endereco': cliente.endereco,
+    })
+
 class SistemaBancario():
-    versao = '0.6'
+    VERSAO = '0.6'
 
     def __init__(self) -> None:
+        print(f'Iniciando Sistema Bancario v{self.VERSAO}')
         ContaCorrente.saque_limite_qtd_dia = configuracoes['saque_limite_qtd_dia']
         ContaCorrente.saque_limite_valor = configuracoes['saque_limite_valor']
 
-        self._clientes: Dict[str, Cliente] = {}
+        self._clientes: Dict[str, Cliente] = carrega_clientes(
+            inicializa_clientes_csv()
+        )
         self._ultimo_numero_conta = 1
     
     @property
@@ -247,8 +281,9 @@ class SistemaBancario():
 
         if (cliente != resultado):
             raise ValueError('Já existe um cliente com mesmo cpf!')
-        
-        return cliente
+
+        persiste_cliente(resultado)        
+        return resultado
     
     @log_operacoes
     def adicionar_conta(self, cliente: Cliente) -> Conta:
@@ -281,4 +316,4 @@ class SistemaBancario():
             yield f'{transacao["data"].strftime("%c")} {"-" if transacao["valor"].is_signed() else "+"} R${abs(transacao["valor"]):.2f}'
         
     def __repr__(self) -> str:
-        return f'SistemaBancario v{self.versao}'
+        return f'SistemaBancario v{self.VERSAO}'

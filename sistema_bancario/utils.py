@@ -1,9 +1,14 @@
+import csv
 from datetime import datetime
 import functools
 from pathlib import Path
+from typing import List, TypedDict
+
+# from sistema_bancario.sistema import Cliente
 
 PWD = Path(__file__).parent
 LOG_FILE = 'log.txt'
+CLIENTES_FILE = 'clientes.csv'
 
 def persiste_log_arquivo(log):
     try:
@@ -11,6 +16,40 @@ def persiste_log_arquivo(log):
             arquivo.write(log)
     except IOError as exc:
         print('Falha ao persistir arquivo de log', exc)
+
+class ClientesCsv(TypedDict):
+    cpf: str
+    nome: str
+    data_nascimento: str
+    endereco: str
+
+def cabecalho_csv(class_type):
+    return list(class_type.__annotations__.keys())
+
+def inicializa_clientes_csv() -> List[ClientesCsv]:
+    print('Inicializando arquivo clientes')
+    list_clientes: List[ClientesCsv] = []
+    try:
+        with open(PWD / CLIENTES_FILE, 'r', newline='', encoding='utf-8') as arquivo:
+            read = csv.DictReader(arquivo)
+            list_clientes = [ClientesCsv(**linha) for linha in read]
+    except FileNotFoundError:
+        with open(PWD / CLIENTES_FILE, 'w', newline='', encoding='utf-8') as arquivo:
+            write = csv.writer(arquivo)
+            write.writerow(cabecalho_csv(ClientesCsv))
+    return list_clientes
+
+def persiste_cliente_csv(cliente: ClientesCsv):
+    try:
+        with open(PWD / CLIENTES_FILE, 'a', newline='', encoding='utf-8') as arquivo:
+            write = csv.DictWriter(arquivo, cliente.keys())
+
+            if arquivo.tell() == 0:
+                write.writeheader()
+
+            write.writerow(cliente)
+    except IOError as exc:
+        print('Falha ao persistir cliente', exc)
 
 def log_operacoes(funcao):
     @functools.wraps(funcao)
