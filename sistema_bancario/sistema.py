@@ -34,7 +34,7 @@ class Cliente:
         self._contas.append(conta)
 
     def __str__(self) -> str:
-        return f'{self.id} - {self.nome}'
+        return f'ID: {self.id} - Nome: {self.nome}'
 
 class PessoaFisica(Cliente):
     def __init__(self, cpf: str, nome: str, data_nascimento: datetime.date, endereco: str):
@@ -50,6 +50,12 @@ class PessoaFisica(Cliente):
     @property
     def nome(self):
         return self._nome
+    
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__}: ({self.id})>'
+
+    def __str__(self) -> str:
+        return f'CPF: {self.id} - Nome: {self.nome}'
 
 class Extrato(TypedDict):
     data: datetime
@@ -85,6 +91,14 @@ class Conta:
     @property
     def numero(self) -> int:
         return self._numero
+    
+    @property
+    def agencia(self) -> str:
+        return self._agencia
+    
+    @property
+    def cliente(self) -> Cliente:
+        return self._cliente
     
     @property
     def saldo(self) -> Decimal:
@@ -130,6 +144,9 @@ class ContaCorrente(Conta):
             raise ValueError(f'Você ja atingiu limite de {self.saque_limite_qtd_dia} saques no dia!')
         
         return super().sacar(valor)
+    
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__}: ('{self.agencia}', '{self.numero}', '{self.cliente.nome}')>"
           
 
 class Transacao(ABC):
@@ -211,6 +228,8 @@ class ContaIterador:
             raise StopIteration
         
 class SistemaBancario():
+    versao = '0.6'
+
     def __init__(self) -> None:
         ContaCorrente.saque_limite_qtd_dia = configuracoes['saque_limite_qtd_dia']
         ContaCorrente.saque_limite_valor = configuracoes['saque_limite_valor']
@@ -228,6 +247,8 @@ class SistemaBancario():
 
         if (cliente != resultado):
             raise ValueError('Já existe um cliente com mesmo cpf!')
+        
+        return cliente
     
     @log_operacoes
     def adicionar_conta(self, cliente: Cliente) -> Conta:
@@ -259,3 +280,5 @@ class SistemaBancario():
             
             yield f'{transacao["data"].strftime("%c")} {"-" if transacao["valor"].is_signed() else "+"} R${abs(transacao["valor"]):.2f}'
         
+    def __repr__(self) -> str:
+        return f'SistemaBancario v{self.versao}'

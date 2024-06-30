@@ -35,10 +35,10 @@ def _interface_adicionar_cliente(adicionar_cliente):
         endereco=endereco,
         nome=nome
     )
-    adicionar_cliente(
+    resultado = adicionar_cliente(
         cliente
     )
-    print('Cliente (Pessoa Fisica) adicionado com sucesso!')
+    print(f'Cliente (Pessoa Fisica) [{resultado}] adicionado com sucesso!')
 
 def _interface_escolha_cliente(clientes: List[Cliente]):
     print()

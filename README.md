@@ -38,7 +38,7 @@ Nessa v1 não será necessário considerar controle de acesso e multiplos usuari
 - [x] Iterador personalizado
   - Implementar iterador personalizado ContaIterador que permita iterar sobre todas as contas do banco, retornando informações básicas de cada conta(cliente, número da conta e saldo atual)
 - [x] Limitar a 10 transacoes por dia
-- [ ] Salvar logs em arquivo log.txt sempre anexando
+- [x] Salvar logs em arquivo log.txt sempre anexando
   - Armazenar funcao, argumentos e resultado da funcao.
 - [ ] Persistir em arquivo clientes.csv dados de clientes
 - [ ] Persistir em arquivo constas.csv dados de contas de clientes
