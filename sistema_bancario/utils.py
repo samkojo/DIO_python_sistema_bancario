@@ -1,5 +1,6 @@
 import csv
 from datetime import datetime
+from decimal import Decimal
 import functools
 from pathlib import Path
 from typing import List, TypedDict
@@ -9,6 +10,7 @@ from typing import List, TypedDict
 PWD = Path(__file__).parent
 LOG_FILE = 'log.txt'
 CLIENTES_FILE = 'clientes.csv'
+CONTAS_FILE = 'contas.csv'
 
 def persiste_log_arquivo(log):
     try:
@@ -50,6 +52,36 @@ def persiste_cliente_csv(cliente: ClientesCsv):
             write.writerow(cliente)
     except IOError as exc:
         print('Falha ao persistir cliente', exc)
+
+class ContasCsv(TypedDict):
+    id_cliente: str
+    agencia: str
+    numero: int
+
+def inicializa_contas_csv() -> List[ContasCsv]:
+    print('Inicializando arquivo contas')
+    list_contas: List[ContasCsv] = []
+    try:
+        with open(PWD / CONTAS_FILE, 'r', newline='', encoding='utf-8') as arquivo:
+            read = csv.DictReader(arquivo)
+            list_contas = [ContasCsv(**linha) for linha in read]
+    except FileNotFoundError:
+        with open(PWD / CONTAS_FILE, 'w', newline='', encoding='utf-8') as arquivo:
+            write = csv.writer(arquivo)
+            write.writerow(cabecalho_csv(ContasCsv))
+    return list_contas
+
+def persiste_conta_csv(conta: ContasCsv):
+    try:
+        with open(PWD / CONTAS_FILE, 'a', newline='', encoding='utf-8') as arquivo:
+            write = csv.DictWriter(arquivo, conta.keys())
+
+            if arquivo.tell() == 0:
+                write.writeheader()
+
+            write.writerow(conta)
+    except IOError as exc:
+        print('Falha ao persistir conta', exc)
 
 def log_operacoes(funcao):
     @functools.wraps(funcao)

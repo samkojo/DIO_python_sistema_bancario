@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from decimal import Decimal
-from typing import Dict, List, Literal, TypedDict
+from typing import Dict, List, Literal, Tuple, TypedDict
 from sistema_bancario.configuracao import configuracoes
-from sistema_bancario.utils import ClientesCsv, inicializa_clientes_csv, log_operacoes, persiste_cliente_csv
+from sistema_bancario.utils import ClientesCsv, ContasCsv, inicializa_clientes_csv, inicializa_contas_csv, log_operacoes, persiste_cliente_csv, persiste_conta_csv
 
 
 class Cliente:
@@ -89,8 +89,8 @@ class Historico:
                 if transacao['data'].date() == datetime.now().date()]
 
 class Conta:
-    def __init__(self, numero: int, cliente: Cliente):
-        self._saldo = Decimal(0)
+    def __init__(self, numero: int, cliente: Cliente, saldo: Decimal = Decimal(0)):
+        self._saldo = saldo
         self._numero = numero
         self._agencia = '0001'
         self._cliente = cliente
@@ -236,19 +236,33 @@ class ContaIterador:
             raise StopIteration
 
 
-def carrega_clientes(list_clientes: List[ClientesCsv]) -> Dict[str, Cliente]:
-    print('Carregando clientes')
+def carrega_clientes(clientes: List[ClientesCsv], contas: List[ContasCsv]) -> Tuple[Dict[str, Cliente], int]:
+    print('Carregando clientes e suas contas')
     dict_clientes: Dict[str, Cliente] = {}
-    for cliente in list_clientes:
-        dict_clientes.setdefault(cliente['cpf'],PessoaFisica(
+    for cliente in clientes:
+        pessoa = PessoaFisica(
             cpf=cliente['cpf'],
             nome=cliente['nome'],
             data_nascimento=datetime.strptime(cliente['data_nascimento'], '%Y-%m-%d').date(),
             endereco=cliente['endereco'],
-        ))
+        )
+
+        for conta in contas:
+            if conta['id_cliente'] != cliente['cpf']:
+                continue
+            pessoa.adicionar_conta(ContaCorrente(
+                int(conta['numero']), 
+                pessoa, 
+                Decimal(0),
+            ))
+
+        dict_clientes.setdefault(cliente['cpf'],pessoa)
     if len(dict_clientes):
         print(f'Carregado(s) {len(dict_clientes)} clientes')
-    return dict_clientes
+
+    ultimo_numero_conta = int(max([conta['numero'] for conta in contas]))+1 if len(contas) else 1
+    print(ultimo_numero_conta)
+    return (dict_clientes, ultimo_numero_conta)
 
 def persiste_cliente(cliente: PessoaFisica):
     persiste_cliente_csv({
@@ -256,6 +270,13 @@ def persiste_cliente(cliente: PessoaFisica):
         'nome': cliente.nome,
         'data_nascimento': cliente.data_nascimento.strftime('%Y-%m-%d'),
         'endereco': cliente.endereco,
+    })
+
+def persiste_conta(conta: ContaCorrente):
+    persiste_conta_csv({
+        'id_cliente': conta.cliente.id,
+        'agencia': conta.agencia,
+        'numero': conta.numero,
     })
 
 class SistemaBancario():
@@ -266,10 +287,10 @@ class SistemaBancario():
         ContaCorrente.saque_limite_qtd_dia = configuracoes['saque_limite_qtd_dia']
         ContaCorrente.saque_limite_valor = configuracoes['saque_limite_valor']
 
-        self._clientes: Dict[str, Cliente] = carrega_clientes(
-            inicializa_clientes_csv()
+        self._clientes, self._ultimo_numero_conta = carrega_clientes(
+            inicializa_clientes_csv(),
+            inicializa_contas_csv()
         )
-        self._ultimo_numero_conta = 1
     
     @property
     def clientes(self):
@@ -294,6 +315,7 @@ class SistemaBancario():
         cliente.adicionar_conta(conta)
 
         self._ultimo_numero_conta += 1
+        persiste_conta(conta)
         return conta
 
     @log_operacoes
