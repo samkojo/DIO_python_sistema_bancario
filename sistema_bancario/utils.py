@@ -11,6 +11,7 @@ PWD = Path(__file__).parent
 LOG_FILE = 'log.txt'
 CLIENTES_FILE = 'clientes.csv'
 CONTAS_FILE = 'contas.csv'
+TRANSACOES_FILE = 'transacoes.csv'
 
 def persiste_log_arquivo(log):
     try:
@@ -27,6 +28,11 @@ class ClientesCsv(TypedDict):
 
 def cabecalho_csv(class_type):
     return list(class_type.__annotations__.keys())
+
+def transform_cast_csv(dict_csv, typed_dict) -> dict:
+    """ Convert values in given dictionary to corresponding types in TypedDict . """
+    fields = typed_dict.__annotations__
+    return {name: fields[name](value) for name, value in dict_csv.items()}
 
 def inicializa_clientes_csv() -> List[ClientesCsv]:
     print('Inicializando arquivo clientes')
@@ -64,7 +70,7 @@ def inicializa_contas_csv() -> List[ContasCsv]:
     try:
         with open(PWD / CONTAS_FILE, 'r', newline='', encoding='utf-8') as arquivo:
             read = csv.DictReader(arquivo)
-            list_contas = [ContasCsv(**linha) for linha in read]
+            list_contas = [transform_cast_csv(linha, ContasCsv) for linha in read]
     except FileNotFoundError:
         with open(PWD / CONTAS_FILE, 'w', newline='', encoding='utf-8') as arquivo:
             write = csv.writer(arquivo)
@@ -82,6 +88,38 @@ def persiste_conta_csv(conta: ContasCsv):
             write.writerow(conta)
     except IOError as exc:
         print('Falha ao persistir conta', exc)
+
+class TransacaoCsv(TypedDict):
+    cliente_id: str
+    conta_agencia: str
+    conta_numero: int
+    datahora: str
+    valor: Decimal
+
+def inicializa_transacoes_csv() -> List[TransacaoCsv]:
+    print('Inicializando arquivo transacoes')
+    list_transacoes: List[TransacaoCsv] = []
+    try:
+        with open(PWD / TRANSACOES_FILE, 'r', newline='', encoding='utf-8') as arquivo:
+            read = csv.DictReader(arquivo)
+            list_transacoes = [transform_cast_csv(linha, TransacaoCsv) for linha in read]
+    except FileNotFoundError:
+        with open(PWD / TRANSACOES_FILE, 'w', newline='', encoding='utf-8') as arquivo:
+            write = csv.writer(arquivo)
+            write.writerow(cabecalho_csv(TransacaoCsv))
+    return list_transacoes
+
+def persiste_transacao_csv(transacao: TransacaoCsv):
+    try:
+        with open(PWD / TRANSACOES_FILE, 'a', newline='', encoding='utf-8') as arquivo:
+            write = csv.DictWriter(arquivo, transacao.keys())
+
+            if arquivo.tell() == 0:
+                write.writeheader()
+
+            write.writerow(transacao)
+    except IOError as exc:
+        print('Falha ao persistir transacao', exc)
 
 def log_operacoes(funcao):
     @functools.wraps(funcao)

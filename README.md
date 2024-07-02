@@ -42,7 +42,7 @@ Nessa v1 não será necessário considerar controle de acesso e multiplos usuari
   - Armazenar funcao, argumentos e resultado da funcao.
 - [x] Persistir em arquivo clientes.csv dados de clientes
 - [x] Persistir em arquivo contas.csv dados de contas de clientes
-- [ ] Persistir em arquivo transacoes.csv dados de transacoes de clientes
+- [x] Persistir em arquivo transacoes.csv dados de transacoes de clientes
 
 ## Modelagem UML
 

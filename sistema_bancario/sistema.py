@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Dict, List, Literal, Tuple, TypedDict
 from sistema_bancario.configuracao import configuracoes
-from sistema_bancario.utils import ClientesCsv, ContasCsv, inicializa_clientes_csv, inicializa_contas_csv, log_operacoes, persiste_cliente_csv, persiste_conta_csv
+from sistema_bancario.utils import ClientesCsv, ContasCsv, TransacaoCsv, inicializa_clientes_csv, inicializa_contas_csv, inicializa_transacoes_csv, log_operacoes, persiste_cliente_csv, persiste_conta_csv, persiste_transacao_csv
 
 
 class Cliente:
@@ -28,10 +28,11 @@ class Cliente:
     def realizar_transacao(self, conta, transacao):
         if len(conta.historico.transacoes_do_dia()) >= configuracoes['transascao_qtd_dia']:
             raise ValueError('Você relealizou o limite máximo de transações por dia')
-        transacao.registrar(conta)
+        return transacao.registrar(conta)
 
     def adicionar_conta(self, conta):
         self._contas.append(conta)
+        return conta
 
     def __str__(self) -> str:
         return f'ID: {self.id} - Nome: {self.nome}'
@@ -77,12 +78,13 @@ class Historico:
     def extrato(self):
         return self._extrato.copy()
 
-    def adicionar_transacao(self, transacao):
+    def adicionar_transacao(self, valor_transacao: Decimal, datahora: datetime = datetime.now()) -> Extrato:
         extrato: Extrato = {
-            'data': datetime.now(),
-            'valor': transacao.valor_transacao,
+            'data': datahora,
+            'valor': valor_transacao,
         }
         self._extrato.append(extrato)
+        return extrato
 
     def transacoes_do_dia(self) -> List[Extrato]:
         return [transacao for transacao in self.extrato
@@ -187,9 +189,9 @@ class Deposito(Transacao):
     def valor_transacao(self):
         return self._valor
     
-    def registrar(self, conta: Conta):
+    def registrar(self, conta: Conta) -> Extrato:
         if conta.depositar(self.valor):
-            conta.historico.adicionar_transacao(self)
+            return conta.historico.adicionar_transacao(self.valor_transacao)
 
 class Saque(Transacao):
     def __init__(self, valor: Decimal):
@@ -205,9 +207,9 @@ class Saque(Transacao):
     def valor_transacao(self):
         return self._valor * -1
     
-    def registrar(self, conta: Conta):
+    def registrar(self, conta: Conta) -> Extrato:
         if conta.sacar(self.valor):
-            conta.historico.adicionar_transacao(self)
+            return conta.historico.adicionar_transacao(self.valor_transacao)
 
 
 class ContaIterador:
@@ -236,8 +238,13 @@ class ContaIterador:
             raise StopIteration
 
 
-def carrega_clientes(clientes: List[ClientesCsv], contas: List[ContasCsv]) -> Tuple[Dict[str, Cliente], int]:
-    print('Carregando clientes e suas contas')
+def carrega_clientes(
+        clientes: List[ClientesCsv], 
+        contas: List[ContasCsv], 
+        transacoes: List[TransacaoCsv],
+    ) -> Tuple[Dict[str, Cliente], int]:
+
+    print('Carregando clientes, suas contas e transacoes')
     dict_clientes: Dict[str, Cliente] = {}
     for cliente in clientes:
         pessoa = PessoaFisica(
@@ -248,19 +255,36 @@ def carrega_clientes(clientes: List[ClientesCsv], contas: List[ContasCsv]) -> Tu
         )
 
         for conta in contas:
-            if conta['id_cliente'] != cliente['cpf']:
+            if conta['id_cliente'] != pessoa.id:
                 continue
-            pessoa.adicionar_conta(ContaCorrente(
-                int(conta['numero']), 
+
+            saldo = sum([
+                transacao['valor'] for transacao in transacoes
+                if (transacao['cliente_id'] == pessoa.id
+                and transacao['conta_agencia'] == conta['agencia']
+                and transacao['conta_numero'] == conta['numero'])
+            ])
+            conta = pessoa.adicionar_conta(ContaCorrente(
+                conta['numero'], 
                 pessoa, 
-                Decimal(0),
+                saldo,
             ))
+
+            for transacao in transacoes:
+                if (transacao['cliente_id'] != conta.cliente.id
+                or transacao['conta_agencia'] != conta.agencia
+                or transacao['conta_numero'] != conta.numero):
+                    continue
+                conta.historico.adicionar_transacao(
+                    datahora=datetime.strptime(transacao['datahora'], '%Y-%m-%d %H:%M:%S'),
+                    valor_transacao=transacao['valor'],
+                )
 
         dict_clientes.setdefault(cliente['cpf'],pessoa)
     if len(dict_clientes):
         print(f'Carregado(s) {len(dict_clientes)} clientes')
 
-    ultimo_numero_conta = int(max([conta['numero'] for conta in contas]))+1 if len(contas) else 1
+    ultimo_numero_conta = max([conta['numero'] for conta in contas])+1 if len(contas) else 1
     print(ultimo_numero_conta)
     return (dict_clientes, ultimo_numero_conta)
 
@@ -279,6 +303,15 @@ def persiste_conta(conta: ContaCorrente):
         'numero': conta.numero,
     })
 
+def persiste_transacao(conta: Conta, extrato: Extrato):
+    persiste_transacao_csv({
+        'cliente_id': conta.cliente.id,
+        'conta_agencia': conta.agencia,
+        'conta_numero': conta.numero,
+        'datahora': extrato['data'].strftime('%Y-%m-%d %H:%M:%S'),
+        'valor': extrato['valor']
+    })
+
 class SistemaBancario():
     VERSAO = '0.6'
 
@@ -289,7 +322,8 @@ class SistemaBancario():
 
         self._clientes, self._ultimo_numero_conta = carrega_clientes(
             inicializa_clientes_csv(),
-            inicializa_contas_csv()
+            inicializa_contas_csv(),
+            inicializa_transacoes_csv(),
         )
     
     @property
@@ -321,12 +355,14 @@ class SistemaBancario():
     @log_operacoes
     def deposito(self, valor: Decimal, cliente: Cliente, conta: Conta):
         transacao = Deposito(valor)
-        cliente.realizar_transacao(conta, transacao)
+        extrato = cliente.realizar_transacao(conta, transacao)
+        persiste_transacao(conta, extrato)
 
     @log_operacoes
     def saque(self, valor: Decimal, cliente: Cliente, conta: Conta):
         transacao = Saque(valor)
-        cliente.realizar_transacao(conta, transacao)
+        extrato = cliente.realizar_transacao(conta, transacao)
+        persiste_transacao(conta, extrato)
 
     @log_operacoes
     def extrato(self, conta: Conta, filtrar_operacao: Literal['Deposito','Saque']):
