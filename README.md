@@ -3,6 +3,11 @@
 Sistema bancario simples que permite depositar (valor positivo), sacar e imprimir um extrato.
 Nessa v1 não será necessário considerar controle de acesso e multiplos usuarios, e moeda única R$.
 
+## Pré-requisitos
+
+- Python (preferivel via ASDF)
+- Extensão do Linter Formater <https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff>
+
 ## Requisitos
 
 - [x] Depositar valor positivo
@@ -43,6 +48,7 @@ Nessa v1 não será necessário considerar controle de acesso e multiplos usuari
 - [x] Persistir em arquivo clientes.csv dados de clientes
 - [x] Persistir em arquivo contas.csv dados de contas de clientes
 - [x] Persistir em arquivo transacoes.csv dados de transacoes de clientes
+- [x] Adicionar padronizacao de codigo, formatador e verificador
 
 ## Modelagem UML
 

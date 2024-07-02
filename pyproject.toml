@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "sistema_bancario"
+version = "0.7.0"
+description = "[DIO] Projeto sistema bancario"
+authors = ["Samuel Fujimoto <fujimoto.samuel@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+usingversion = "^0.1.2"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.5.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
